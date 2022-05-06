@@ -1,0 +1,18 @@
+.textarea {
+    border: 1px solid black;
+    margin: 5px;
+    width: 440px;
+    height: 140px;
+}
+.key, .widekey, .pressed {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    border: 2px solid rgb(48, 48, 48);
+    border-radius: 10px;
+}
+.widekey {
+    width: 80px;
+}
