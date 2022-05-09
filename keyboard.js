@@ -249,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('keydown', (event) => {
-    console.log(event);
 
     // change color of key div and get key instance
     let keyInstance = markKey(event.code, true);
@@ -280,14 +279,17 @@ document.addEventListener('keydown', (event) => {
     else if(realLetter == 'Enter') {
         TEXTAREA.innerHTML += '<br>';
     }
+    else if(realLetter == 'Backspace') {
+        let text = TEXTAREA.innerHTML;
+        text = text.substring(0, text.length - 1);
+        TEXTAREA.innerHTML = text;
+    }
     else if(keyInstance.isSpecial) {
         // pass
     }
     else if(typeof expectedLetter != 'undefined') {
         TEXTAREA.innerHTML += expectedLetter;
     }
-
-    console.log(expectedLetter, realLetter);
 
 });
 
