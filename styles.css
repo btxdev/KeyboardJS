@@ -1,10 +1,16 @@
 .textarea {
     border: 1px solid black;
     margin: 5px;
+    height: 140px;
+    width: 480px;
+}
+.keyboard {
+    border: 1px solid black;
+    margin: 5px;
     width: 1200px;
     height: 140px;
 }
-.key, .widekey, .pressed {
+.key, .widekey {
     float: left;
     position: relative;
     width: 40px;
@@ -13,6 +19,12 @@
     border: 2px solid rgb(48, 48, 48);
     border-radius: 10px;
     cursor: pointer;
+}
+.keyup {
+    background-color: white;
+}
+.keydown {
+    background-color: rgb(240, 234, 227);
 }
 .widekey {
     width: 80px;
