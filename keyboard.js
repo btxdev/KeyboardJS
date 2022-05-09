@@ -1,4 +1,5 @@
-let LANGUAGE = 'RU';
+let LANGUAGE = 'EN';
+let CAPSLOCK = false;
 const TEXTAREA = document.getElementById('textarea');
 const KEYBOARD = document.getElementById('keyboard');
 let KEYS;
@@ -99,7 +100,9 @@ class Key {
 
         let elemClass = this._wide ? 'widekey' : 'key';
         let elemId = this._id;
-        let html = `<div class="${elemClass}" id="${elemId}">
+        let capsState = (this._code == 'CapsLock') && CAPSLOCK;
+        let caps = capsState ? 'keydown' : '';
+        let html = `<div class="${elemClass} ${caps}" id="${elemId}">
             <div class="key-tl ${topLeftStyle}">${topLeft}</div>
             <div class="key-tr ${topRightStyle}">${topRight}</div>
             <div class="key-bl ${bottomLeftStyle}">${bottomLeft}</div>
@@ -237,6 +240,9 @@ const getExpectedLetterByCode = (code, lang, shift) => {
 const markKey = (code, pressed) => {
     for(key of KEYS) {
         if(key.code == code) {
+            // caps lock block
+            if(key.code == 'CapsLock') pressed = CAPSLOCK;
+            // mark
             key.press(pressed);
             return key;
         }
@@ -258,8 +264,8 @@ document.addEventListener('keydown', (event) => {
     // change language if expected letter != real letter
     let realLetter = event.key;
     let hasShift = PRESSED_KEYS.hasOwnProperty('ShiftLeft') || PRESSED_KEYS.hasOwnProperty('ShiftRight');
-    let hasCaps = event.getModifierState('CapsLock');
-    let shift = hasShift ^ hasCaps;
+    CAPSLOCK = event.getModifierState('CapsLock');
+    let shift = hasShift ^ CAPSLOCK;
     let expectedLetter = getExpectedLetterByInstance(keyInstance, LANGUAGE, shift);
 
     // change language of keyboard, reset key
