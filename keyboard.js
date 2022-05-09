@@ -4,18 +4,6 @@ const KEYBOARD = document.getElementById('keyboard');
 let KEYS;
 let PRESSED_KEYS = {};
 
-// PRESSED_KEYS.add = (key) => {
-//     console.log(this);
-//     if(this.indexOf(key) < 0) this.push(key);
-// }
-// PRESSED_KEYS.remove = (key) => {
-//     let ind = this.indexOf(key);
-//     if(ind >= 0) this.splice(ind, 1);
-// }
-// PRESSED_KEYS.has = (key) => {
-//     return (this.indexOf(key) >= 0);
-// }
-
 class Key {
     constructor(isSpecial, primary, secondary, primaryShift, secondaryShift, isWide, code) {
         if(typeof isWide == 'undefined') {
@@ -134,6 +122,9 @@ class Key {
     get code() {
         return this._code;
     }
+    get isSpecial() {
+        return this._type == 'special';
+    }
 }
 
 const renderKeyboard = () => {
@@ -211,7 +202,7 @@ const initKeyboard = () => {
         new Key(true, 'Ctr', undefined, undefined, undefined, undefined, 'ControlLeft'),
         new Key(true, '[]', undefined, undefined, undefined, undefined, 'MetaLeft'),
         new Key(true, 'Alt', undefined, undefined, undefined, undefined, 'AltLeft'),
-        new Key(true, '', undefined, undefined, undefined, undefined, 'Space'),
+        new Key(true, ' ', undefined, undefined, undefined, undefined, 'Space'),
         new Key(true, 'Alt', undefined, undefined, undefined, undefined, 'AltRight'),
         new Key(true, '[]', undefined, undefined, undefined, undefined, 'MetaRight'),
         new Key(true, '[--]', undefined, undefined, undefined, undefined, 'ContextMenu'),
@@ -226,10 +217,28 @@ const getKeyboardLanguage = (code) => {
     //let char = 
 }
 
+const getExpectedLetterByInstance = (instance, lang, shift) => {
+    if(lang == 'EN') {
+        if(shift) return instance._primaryShift;
+        else return instance._primary;
+    }
+    else {
+        if(shift) return instance._secondaryShift;
+        else return instance._secondary;
+    }
+}
+
+const getExpectedLetterByCode = (code, lang, shift) => {
+    for(key of KEYS) {
+        if(key.code == code) return getExpectedLetterByInstance(instance, lang, shift);
+    }
+}
+
 const markKey = (code, pressed) => {
     for(key of KEYS) {
         if(key.code == code) {
             key.press(pressed);
+            return key;
         }
     }
 }
@@ -241,11 +250,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('keydown', (event) => {
     console.log(event);
-    // change color of key div
-    markKey(event.code, true);
+
+    // change color of key div and get key instance
+    let keyInstance = markKey(event.code, true);
 
     PRESSED_KEYS[event.code] = true;
 
+    // change language if expected letter != real letter
+    let realLetter = event.key;
+    let hasShift = PRESSED_KEYS.hasOwnProperty('ShiftLeft') || PRESSED_KEYS.hasOwnProperty('ShiftRight');
+    let hasCaps = event.getModifierState('CapsLock');
+    let shift = hasShift ^ hasCaps;
+    let expectedLetter = getExpectedLetterByInstance(keyInstance, LANGUAGE, shift);
+
+    // change language of keyboard, reset key
+    let previousLanguage = LANGUAGE;
+    if(typeof expectedLetter != 'undefined' && (expectedLetter != realLetter)) {
+        LANGUAGE = LANGUAGE == 'RU' ? 'EN' : 'RU';
+    }
+    let languageChanged = previousLanguage != LANGUAGE;
+    if(languageChanged) {
+        expectedLetter = getExpectedLetterByInstance(keyInstance, LANGUAGE, shift);
+        renderKeyboard();
+    }
+
+    if(realLetter == 'Space') {
+        TEXTAREA.innerHTML += ' ';
+    }
+    else if(realLetter == 'Enter') {
+        TEXTAREA.innerHTML += '<br>';
+    }
+    else if(keyInstance.isSpecial) {
+        // pass
+    }
+    else if(typeof expectedLetter != 'undefined') {
+        TEXTAREA.innerHTML += expectedLetter;
+    }
+
+    console.log(expectedLetter, realLetter);
 
 });
 
@@ -260,7 +302,7 @@ document.addEventListener('keyup', (event) => {
     let languageChanged = previousLanguage != LANGUAGE;
     if(languageChanged) renderKeyboard();
 
-    // print language
+    // print current language
     document.getElementById('language').innerHTML = 'Lang: ' + LANGUAGE;
 
     // change color of key div

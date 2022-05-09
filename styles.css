@@ -1,14 +1,15 @@
 .textarea {
     border: 1px solid black;
     margin: 5px;
-    height: 140px;
+    height: auto;
     width: 480px;
+    overflow-wrap: anywhere;
 }
 .keyboard {
     border: 1px solid black;
     margin: 5px;
-    width: 1200px;
-    height: 140px;
+    width: auto;
+    height: auto;
 }
 .key, .widekey {
     float: left;
