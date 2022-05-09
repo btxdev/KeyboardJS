@@ -1,7 +1,23 @@
-let LANGUAGE = 'EN';
+let LANGUAGE = 'RU';
+const TEXTAREA = document.getElementById('textarea');
+const KEYBOARD = document.getElementById('keyboard');
+let KEYS;
+let PRESSED_KEYS = {};
+
+// PRESSED_KEYS.add = (key) => {
+//     console.log(this);
+//     if(this.indexOf(key) < 0) this.push(key);
+// }
+// PRESSED_KEYS.remove = (key) => {
+//     let ind = this.indexOf(key);
+//     if(ind >= 0) this.splice(ind, 1);
+// }
+// PRESSED_KEYS.has = (key) => {
+//     return (this.indexOf(key) >= 0);
+// }
 
 class Key {
-    constructor(isSpecial, primary, secondary, primaryShift, secondaryShift, isWide, specialName) {
+    constructor(isSpecial, primary, secondary, primaryShift, secondaryShift, isWide, code) {
         if(typeof isWide == 'undefined') {
             isWide = isSpecial;
         }
@@ -11,7 +27,8 @@ class Key {
         this._secondary = secondary;
         this._primaryShift = primaryShift;
         this._secondaryShift = secondaryShift;
-        this._specialName = specialName;
+        this._code = code;
+        this._id = 'KeyId_' + this._type + '_' + code;
     }
     format(str) {
         return typeof str == 'undefined' ? '' : String(str);
@@ -61,8 +78,8 @@ class Key {
         }
 
         // is special button
-        else if(typeof this._specialName != 'undefined') {
-            topLeft = this._specialName;
+        else if(this._type == 'special') {
+            topLeft = primary;
         }
 
         // is letters
@@ -93,100 +110,153 @@ class Key {
         }
 
         let elemClass = this._wide ? 'widekey' : 'key';
-        let code = `<div class="${elemClass}">
+        let elemId = this._id;
+        let html = `<div class="${elemClass}" id="${elemId}">
             <div class="key-tl ${topLeftStyle}">${topLeft}</div>
             <div class="key-tr ${topRightStyle}">${topRight}</div>
             <div class="key-bl ${bottomLeftStyle}">${bottomLeft}</div>
             <div class="key-br ${bottomRightStyle}">${bottomRight}</div>
         </div>`;
-        return code;
+        return html;
+    }
+    press(pressed) {
+        let elem = document.getElementById(this._id);
+        if(pressed) {
+            elem.classList.remove('keyup');
+            elem.classList.add('keydown');
+        }
+        else {
+            elem.classList.remove('keydown');
+            elem.classList.add('keyup');
+            
+        }
+    }
+    get code() {
+        return this._code;
     }
 }
 
-const TEXTAREA = document.getElementById('textarea');
-
 const initKeyboard = () => {
-    let keys = [
-        new Key(false, '`', 'ё', '~', 'Ё'),
-        new Key(false, '1', '1', '!', '!'),
-        new Key(false, '2', '2', '@', '"'),
-        new Key(false, '3', '3', '#', '№'),
-        new Key(false, '4', '4', '$', ';'),
-        new Key(false, '5', '5', '%', '%'),
-        new Key(false, '6', '6', '^', ':'),
-        new Key(false, '7', '7', '&', '?'),
-        new Key(false, '8', '8', '*', '*'),
-        new Key(false, '9', '9', '(', '('),
-        new Key(false, '0', '0', ')', ')'),
-        new Key(false, '-', '-', '_', '_'),
-        new Key(false, '=', '=', '+', '+'),
+    KEYS = [
+        new Key(false, '`', 'ё', '~', 'Ё', false, 'Backquote'),
+        new Key(false, '1', '1', '!', '!', false, 'Digit1'),
+        new Key(false, '2', '2', '@', '"', false, 'Digit2'),
+        new Key(false, '3', '3', '#', '№', false, 'Digit3'),
+        new Key(false, '4', '4', '$', ';', false, 'Digit4'),
+        new Key(false, '5', '5', '%', '%', false, 'Digit5'),
+        new Key(false, '6', '6', '^', ':', false, 'Digit6'),
+        new Key(false, '7', '7', '&', '?', false, 'Digit7'),
+        new Key(false, '8', '8', '*', '*', false, 'Digit8'),
+        new Key(false, '9', '9', '(', '(', false, 'Digit9'),
+        new Key(false, '0', '0', ')', ')', false, 'Digit0'),
+        new Key(false, '-', '-', '_', '_', false, 'Minus'),
+        new Key(false, '=', '=', '+', '+', false, 'Equal'),
         new Key(true, 'Backspace', undefined, undefined, undefined, undefined, 'Backspace'),
         new Key(true, 'newline'),
 
         new Key(true, 'Tab', undefined, undefined, undefined, undefined, 'Tab'),
-        new Key(false, 'q', 'й', 'Q', 'Й'),
-        new Key(false, 'w', 'ц', 'W', 'Ц'),
-        new Key(false, 'e', 'у', 'E', 'У'),
-        new Key(false, 'r', 'к', 'R', 'К'),
-        new Key(false, 't', 'е', 'T', 'Е'),
-        new Key(false, 'y', 'н', 'Y', 'Н'),
-        new Key(false, 'u', 'г', 'U', 'Г'),
-        new Key(false, 'i', 'ш', 'I', 'Ш'),
-        new Key(false, 'o', 'щ', 'O', 'Щ'),
-        new Key(false, 'p', 'з', 'P', 'З'),
-        new Key(false, '[', 'х', '{', 'Х'),
-        new Key(false, ']', 'ъ', '}', 'Ъ'),
+        new Key(false, 'q', 'й', 'Q', 'Й', false, 'KeyQ'),
+        new Key(false, 'w', 'ц', 'W', 'Ц', false, 'KeyW'),
+        new Key(false, 'e', 'у', 'E', 'У', false, 'KeyE'),
+        new Key(false, 'r', 'к', 'R', 'К', false, 'KeyR'),
+        new Key(false, 't', 'е', 'T', 'Е', false, 'KeyT'),
+        new Key(false, 'y', 'н', 'Y', 'Н', false, 'KeyY'),
+        new Key(false, 'u', 'г', 'U', 'Г', false, 'KeyU'),
+        new Key(false, 'i', 'ш', 'I', 'Ш', false, 'KeyI'),
+        new Key(false, 'o', 'щ', 'O', 'Щ', false, 'KeyO'),
+        new Key(false, 'p', 'з', 'P', 'З', false, 'KeyP'),
+        new Key(false, '[', 'х', '{', 'Х', false, 'BracketLeft'),
+        new Key(false, ']', 'ъ', '}', 'Ъ', false, 'BracketRight'),
         new Key(true, 'Enter', undefined, undefined, undefined, undefined, 'Enter'),
         new Key(true, 'newline'),
 
-        new Key(true, 'CapsLock', undefined, undefined, undefined, undefined, 'Caps Lock'),
-        new Key(false, 'a', 'ф', 'A', 'Ф'),
-        new Key(false, 's', 'ы', 'S', 'Ы'),
-        new Key(false, 'd', 'в', 'D', 'В'),
-        new Key(false, 'f', 'а', 'F', 'А'),
-        new Key(false, 'g', 'п', 'G', 'П'),
-        new Key(false, 'h', 'р', 'H', 'Р'),
-        new Key(false, 'j', 'о', 'J', 'О'),
-        new Key(false, 'k', 'л', 'K', 'Л'),
-        new Key(false, 'l', 'д', 'L', 'Д'),
-        new Key(false, ';', 'ж', ':', 'Ж'),
-        new Key(false, '\'', 'э', '"', 'Э'),
-        new Key(false, '\\', '\\', '|', '/'),
+        new Key(true, 'Caps Lock', undefined, undefined, undefined, undefined, 'CapsLock'),
+        new Key(false, 'a', 'ф', 'A', 'Ф', false, 'KeyA'),
+        new Key(false, 's', 'ы', 'S', 'Ы', false, 'KeyS'),
+        new Key(false, 'd', 'в', 'D', 'В', false, 'KeyD'),
+        new Key(false, 'f', 'а', 'F', 'А', false, 'KeyF'),
+        new Key(false, 'g', 'п', 'G', 'П', false, 'KeyG'),
+        new Key(false, 'h', 'р', 'H', 'Р', false, 'KeyH'),
+        new Key(false, 'j', 'о', 'J', 'О', false, 'KeyJ'),
+        new Key(false, 'k', 'л', 'K', 'Л', false, 'KeyK'),
+        new Key(false, 'l', 'д', 'L', 'Д', false, 'KeyL'),
+        new Key(false, ';', 'ж', ':', 'Ж', false, 'Semicolon'),
+        new Key(false, '\'', 'э', '"', 'Э', false, 'Quote'),
+        new Key(false, '\\', '\\', '|', '/', false, 'Backslash'),
         new Key(true, 'newline'),
 
-        new Key(true, 'LeftShift', undefined, undefined, undefined, undefined, 'Shift'),
-        new Key(false, '\\', '\\', '|', '/'),
-        new Key(false, 'z', 'я', 'Z', 'Я'),
-        new Key(false, 'x', 'ч', 'X', 'Ч'),
-        new Key(false, 'c', 'с', 'C', 'С'),
-        new Key(false, 'v', 'м', 'V', 'М'),
-        new Key(false, 'b', 'и', 'B', 'И'),
-        new Key(false, 'n', 'т', 'N', 'Т'),
-        new Key(false, 'm', 'ь', 'M', 'Ь'),
-        new Key(false, ',', 'б', '<', 'Б'),
-        new Key(false, '.', 'ю', '>', 'Ю'),
-        new Key(false, '/', '.', '?', ','),
-        new Key(true, 'RightShift', undefined, undefined, undefined, undefined, 'Shift'),
+        new Key(true, 'Shift', undefined, undefined, undefined, undefined, 'ShiftLeft'),
+        new Key(false, '\\', '\\', '|', '/', false, 'IntlBackslash'),
+        new Key(false, 'z', 'я', 'Z', 'Я', false, 'KeyZ'),
+        new Key(false, 'x', 'ч', 'X', 'Ч', false, 'KeyX'),
+        new Key(false, 'c', 'с', 'C', 'С', false, 'KeyC'),
+        new Key(false, 'v', 'м', 'V', 'М', false, 'KeyV'),
+        new Key(false, 'b', 'и', 'B', 'И', false, 'KeyB'),
+        new Key(false, 'n', 'т', 'N', 'Т', false, 'KeyN'),
+        new Key(false, 'm', 'ь', 'M', 'Ь', false, 'KeyM'),
+        new Key(false, ',', 'б', '<', 'Б', false, 'Key,'),
+        new Key(false, '.', 'ю', '>', 'Ю', false, 'KeyPeriod'),
+        new Key(false, '/', '.', '?', ',', false, 'KeySlash'),
+        new Key(true, 'Shift', undefined, undefined, undefined, undefined, 'ShiftRight'),
         new Key(true, 'newline'),
 
-        new Key(true, 'LeftCtrl', undefined, undefined, undefined, undefined, specialName='Ctrl'),
-        new Key(true, 'LeftSpecial'),
-        new Key(true, 'LeftAlt', undefined, undefined, undefined, undefined, specialName='Alt'),
-        new Key(true, 'Spacebar', undefined, undefined, undefined, undefined, specialName=''),
-        new Key(true, 'RightAlt', undefined, undefined, undefined, undefined, specialName='Alt'),
-        new Key(true, 'RightSpecial'),
-        new Key(true, 'RightList'),
-        new Key(true, 'RightCtrl', undefined, undefined, undefined, undefined, 'Ctrl'),
+        new Key(true, 'Ctr', undefined, undefined, undefined, undefined, 'ControlLeft'),
+        new Key(true, '[]', undefined, undefined, undefined, undefined, 'MetaLeft'),
+        new Key(true, 'Alt', undefined, undefined, undefined, undefined, 'AltLeft'),
+        new Key(true, '', undefined, undefined, undefined, undefined, 'Space'),
+        new Key(true, 'Alt', undefined, undefined, undefined, undefined, 'AltRight'),
+        new Key(true, '[]', undefined, undefined, undefined, undefined, 'MetaRight'),
+        new Key(true, '[--]', undefined, undefined, undefined, undefined, 'ContextMenu'),
+        new Key(true, 'Ctrl', undefined, undefined, undefined, undefined, 'ControlRight'),
         new Key(true, 'newline'),
-
     ];
 
-    for(key of keys) {
-        TEXTAREA.innerHTML += key.getHTML();
+    for(key of KEYS) {
+        KEYBOARD.innerHTML += key.getHTML();
     }
+}
 
+const getKeyboardLanguage = (code) => {
+    const enChars = ['abcdefghijklmnopqrstuvwxyz'];
+    const ruChars = ['абвгдеёжзийклмнопрстуфхцчшщьъыюя'];
+    //let char = 
+}
+
+const markKey = (code, pressed) => {
+    for(key of KEYS) {
+        if(key.code == code) {
+            key.press(pressed);
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initKeyboard();
+});
+
+document.addEventListener('keydown', (event) => {
+    console.log(event);
+    // change color of key div
+    markKey(event.code, true);
+
+    PRESSED_KEYS[event.code] = true;
+
+
+});
+
+document.addEventListener('keyup', (event) => {
+    // change language
+    let hasShift = PRESSED_KEYS.hasOwnProperty('ShiftLeft') || PRESSED_KEYS.hasOwnProperty('ShiftRight');
+    let hasAlt = PRESSED_KEYS.hasOwnProperty('AltLeft') || PRESSED_KEYS.hasOwnProperty('AltRight');
+    if(hasAlt && hasShift) {
+        LANGUAGE = LANGUAGE == 'RU' ? 'EN' : 'RU';
+    }
+
+    // print language
+    document.getElementById('language').innerHTML = 'Lang: ' + LANGUAGE;
+
+    // change color of key div
+    markKey(event.code, false);
+
+    delete PRESSED_KEYS[event.code];
 });
