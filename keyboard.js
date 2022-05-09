@@ -136,6 +136,14 @@ class Key {
     }
 }
 
+const renderKeyboard = () => {
+    let html = '';
+    for(key of KEYS) {
+        html += key.getHTML();
+    }
+    KEYBOARD.innerHTML = html;
+}
+
 const initKeyboard = () => {
     KEYS = [
         new Key(false, '`', 'ё', '~', 'Ё', false, 'Backquote'),
@@ -210,10 +218,6 @@ const initKeyboard = () => {
         new Key(true, 'Ctrl', undefined, undefined, undefined, undefined, 'ControlRight'),
         new Key(true, 'newline'),
     ];
-
-    for(key of KEYS) {
-        KEYBOARD.innerHTML += key.getHTML();
-    }
 }
 
 const getKeyboardLanguage = (code) => {
@@ -232,6 +236,7 @@ const markKey = (code, pressed) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initKeyboard();
+    renderKeyboard();
 });
 
 document.addEventListener('keydown', (event) => {
@@ -248,9 +253,12 @@ document.addEventListener('keyup', (event) => {
     // change language
     let hasShift = PRESSED_KEYS.hasOwnProperty('ShiftLeft') || PRESSED_KEYS.hasOwnProperty('ShiftRight');
     let hasAlt = PRESSED_KEYS.hasOwnProperty('AltLeft') || PRESSED_KEYS.hasOwnProperty('AltRight');
+    let previousLanguage = LANGUAGE;
     if(hasAlt && hasShift) {
         LANGUAGE = LANGUAGE == 'RU' ? 'EN' : 'RU';
     }
+    let languageChanged = previousLanguage != LANGUAGE;
+    if(languageChanged) renderKeyboard();
 
     // print language
     document.getElementById('language').innerHTML = 'Lang: ' + LANGUAGE;
