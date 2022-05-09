@@ -42,15 +42,9 @@ class Key {
         let primaryShift = this.format(this._primaryShift);
         let secondaryShift = this.format(this._secondaryShift);
 
-        let topLeft = '';
-        let topRight = '';
-        let bottomLeft = '';
-        let bottomRight = '';
+        let [topLeft, topRight, bottomLeft, bottomRight] = ['', '', '', ''];
 
-        let topLeftStyle = 'key-normal';
-        let topRightStyle = 'key-normal';
-        let bottomLeftStyle = 'key-normal';
-        let bottomRightStyle = 'key-normal';
+        let [topLeftStyle, topRightStyle, bottomLeftStyle, bottomRightStyle] = ['key-normal', 'key-normal', 'key-normal', 'key-normal'];
 
         // is digits
         if(primary == secondary) {
@@ -214,12 +208,6 @@ const initKeyboard = () => {
     ];
 }
 
-const getKeyboardLanguage = (code) => {
-    const enChars = ['abcdefghijklmnopqrstuvwxyz'];
-    const ruChars = ['абвгдеёжзийклмнопрстуфхцчшщьъыюя'];
-    //let char = 
-}
-
 const getExpectedLetterByInstance = (instance, lang, shift) => {
     if(lang == 'EN') {
         if(shift) return instance._primaryShift;
@@ -254,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderKeyboard();
 });
 
-document.addEventListener('keydown', (event) => {
+const keyDown = (event) => {
 
     // change color of key div and get key instance
     let keyInstance = markKey(event.code, true);
@@ -270,7 +258,7 @@ document.addEventListener('keydown', (event) => {
 
     // change language of keyboard, reset key
     let previousLanguage = LANGUAGE;
-    if(typeof expectedLetter != 'undefined' && (expectedLetter != realLetter)) {
+    if(!keyInstance.isSpecial && typeof expectedLetter != 'undefined' && (expectedLetter != realLetter)) {
         LANGUAGE = LANGUAGE == 'RU' ? 'EN' : 'RU';
     }
     let languageChanged = previousLanguage != LANGUAGE;
@@ -279,7 +267,7 @@ document.addEventListener('keydown', (event) => {
         renderKeyboard();
     }
 
-    if(realLetter == 'Space') {
+    if(realLetter == ' ') {
         TEXTAREA.innerHTML += ' ';
     }
     else if(realLetter == 'Enter') {
@@ -297,9 +285,10 @@ document.addEventListener('keydown', (event) => {
         TEXTAREA.innerHTML += expectedLetter;
     }
 
-});
+}
 
-document.addEventListener('keyup', (event) => {
+const keyUp = (event) => {
+
     // change language
     let hasShift = PRESSED_KEYS.hasOwnProperty('ShiftLeft') || PRESSED_KEYS.hasOwnProperty('ShiftRight');
     let hasAlt = PRESSED_KEYS.hasOwnProperty('AltLeft') || PRESSED_KEYS.hasOwnProperty('AltRight');
@@ -317,4 +306,13 @@ document.addEventListener('keyup', (event) => {
     markKey(event.code, false);
 
     delete PRESSED_KEYS[event.code];
+
+}
+
+document.addEventListener('keydown', (event) => {
+    keyDown(event);
+});
+
+document.addEventListener('keyup', (event) => {
+    keyUp(event);
 });

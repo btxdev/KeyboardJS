@@ -4,6 +4,7 @@
     height: auto;
     width: 480px;
     overflow-wrap: anywhere;
+    white-space: pre-wrap;
 }
 .keyboard {
     border: 1px solid black;
